@@ -16,35 +16,105 @@ h1 {
   color: #1db954;
 }
 
-.search-section {
+.add-song-section {
   display: flex;
   margin-bottom: 20px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-#search-input {
-  flex: 1;
+.add-song-section input, .add-song-section select {
   padding: 10px;
   background-color: #333;
   border: 1px solid #555;
   color: #fff;
-  border-radius: 4px 0 0 4px;
+  border-radius: 4px;
 }
 
-#search-btn {
+.add-song-section button {
   padding: 10px 20px;
   background-color: #1db954;
   border: none;
   color: #fff;
   cursor: pointer;
-  border-radius: 0 4px 4px 0;
+  border-radius: 4px;
 }
 
-#search-btn:hover {
+.add-song-section button:hover {
   background-color: #1aa34a;
 }
 
-.results {
+.playlist {
   margin-bottom: 20px;
+}
+
+.song-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #333;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.song-item:hover {
+  background-color: #444;
+}
+
+.song-info {
+  flex: 1;
+}
+
+.song-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.song-artist {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.song-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.favorite-btn.favorited {
+  color: #ff0000;
+}
+
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.controls button {
+  padding: 10px 20px;
+  background-color: #333;
+  border: 1px solid #555;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.controls button:hover {
+  background-color: #555;
+}
+
+.current-song {
+  text-align: center;
+  font-size: 18px;
+  color: #1db954;
 }
 
 .video-item {

@@ -1,3 +1,8 @@
+import { DoublyLinkedList, Song } from './playlist.js';
+// Importar configuración
+import { config } from './config.js';
+const playlist = new DoublyLinkedList();
+let lastResults = [];
 // Verifica con videos.list cuáles IDs son embebibles (evita errores 101/150)
 async function filterEmbeddableVideos(items, apiKey) {
     const ids = items.map(i => i.id.videoId).filter(Boolean);
@@ -21,13 +26,6 @@ async function filterEmbeddableVideos(items, apiKey) {
         return items;
     }
 }
-/** Variables globales */
-let player = null;
-let currentVideoId = null;
-let isPlayerReady = false;
-let lastResults = [];
-// Importar configuración
-import { config } from './config.js';
 // Función para obtener la API key
 function getApiKey() {
     console.log('API Key cargada:', config.YOUTUBE_API_KEY);
@@ -79,15 +77,110 @@ function displayResults(videos) {
       <img src="${video.snippet.thumbnails.default.url}" alt="${video.snippet.title}" class="video-thumbnail">
       <div class="video-title">${video.snippet.title}</div>
       <div class="video-actions">
+        <button class="action-btn btn-add-to-playlist" aria-label="Agregar a lista">➕</button>
         <button class="action-btn btn-play" aria-label="Reproducir">▶️</button>
-        <button class="action-btn btn-pause" aria-label="Pausar">⏸️</button>
-        <button class="action-btn btn-stop" aria-label="Detener">⏹️</button>
       </div>
     `;
         resultsContainer.appendChild(videoElement);
     });
 }
-/** Seleccionar video: carga y reproduce inmediatamente aprovechando el gesto del usuario */
+function updatePlaylistDisplay() {
+    const playlistContainer = document.getElementById('playlist');
+    playlistContainer.innerHTML = '';
+    const songs = playlist.getAllSongs();
+    songs.forEach((song, index) => {
+        const songElement = document.createElement('div');
+        songElement.className = 'song-item';
+        songElement.innerHTML = `
+      <div class="song-info">
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist} ${song.duration ? `(${song.duration})` : ''}</div>
+      </div>
+      <div class="song-actions">
+        <button class="favorite-btn ${song.isFavorite ? 'favorited' : ''}" data-index="${index}">❤️</button>
+        <button class="action-btn btn-select" data-index="${index}">Seleccionar</button>
+        <button class="action-btn btn-remove" data-index="${index}">Eliminar</button>
+      </div>
+    `;
+        playlistContainer.appendChild(songElement);
+    });
+}
+function updateCurrentSong() {
+    const currentSongElement = document.getElementById('current-song');
+    const current = playlist.getCurrent();
+    currentSongElement.textContent = current ? `${current.title} - ${current.artist}` : 'Ninguna canción seleccionada';
+}
+function addSong() {
+    const titleInput = document.getElementById('title-input');
+    const artistInput = document.getElementById('artist-input');
+    const durationInput = document.getElementById('duration-input');
+    const positionSelect = document.getElementById('position-select');
+    const positionInput = document.getElementById('position-input');
+    const title = titleInput.value.trim();
+    const artist = artistInput.value.trim();
+    const duration = durationInput.value.trim();
+    if (!title || !artist) {
+        alert('Por favor ingresa título y artista');
+        return;
+    }
+    const song = new Song(title, artist, duration);
+    const position = positionSelect.value;
+    if (position === 'beginning') {
+        playlist.addAtBeginning(song);
+    }
+    else if (position === 'end') {
+        playlist.addAtEnd(song);
+    }
+    else if (position === 'position') {
+        const pos = parseInt(positionInput.value);
+        if (isNaN(pos) || pos < 0 || pos > playlist.getSize()) {
+            alert('Posición inválida');
+            return;
+        }
+        playlist.addAtPosition(song, pos);
+    }
+    updatePlaylistDisplay();
+    titleInput.value = '';
+    artistInput.value = '';
+    durationInput.value = '';
+    positionInput.value = '';
+}
+function nextSong() {
+    playlist.next();
+    updateCurrentSong();
+}
+function previousSong() {
+    playlist.previous();
+    updateCurrentSong();
+}
+function addSongFromSearch(video) {
+    const song = new Song(video.snippet.title, video.snippet.channelTitle, '', false, video.id.videoId);
+    playlist.addAtEnd(song);
+    updatePlaylistDisplay();
+}
+function toggleFavorite(index) {
+    const songs = playlist.getAllSongs();
+    songs[index].isFavorite = !songs[index].isFavorite;
+    updatePlaylistDisplay();
+}
+// Variables globales para YouTube
+let player = null;
+let currentVideoId = null;
+let isPlayerReady = false;
+// Función para reproducir
+function playSong() {
+    const current = playlist.getCurrent();
+    if (current && current.videoId) {
+        selectVideo(current.videoId);
+    }
+    else if (current) {
+        alert(`Reproduciendo: ${current.title} - ${current.artist}`);
+    }
+    else {
+        alert('No hay canción seleccionada');
+    }
+}
+// Seleccionar video: carga y reproduce inmediatamente aprovechando el gesto del usuario
 function selectVideo(videoId) {
     console.log('[UI] Seleccionado video:', videoId);
     currentVideoId = videoId;
@@ -136,45 +229,17 @@ function onYouTubeIframeAPIReady() {
         }
     });
 }
-// Función para reproducir
-function playVideo() {
-    if (!player)
-        return;
-    if (!currentVideoId) {
-        alert('Primero selecciona un video de la lista');
-        return;
-    }
-    if (!isPlayerReady) {
-        console.log('[YT] Player no listo aún; se reproducirá cuando esté listo');
-        return;
-    }
-    try {
-        // Nos aseguramos de que el video esté cargado antes de reproducir
-        player.loadVideoById(currentVideoId);
-        player.playVideo();
-    }
-    catch (e) {
-        console.error('[YT] Error al reproducir:', e);
-    }
-}
-// Función para pausar
-function pauseVideo() {
-    if (player) {
-        player.pauseVideo();
-    }
-}
-// Función para detener
-function stopVideo() {
-    if (player) {
-        player.stopVideo();
-    }
-}
-// Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById('search-btn');
     const searchInput = document.getElementById('search-input');
     const resultsContainer = document.getElementById('results');
-    console.log('[UI] Controles cargados (por canción)');
+    const addBtn = document.getElementById('add-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const playBtn = document.getElementById('play-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const positionSelect = document.getElementById('position-select');
+    const positionInput = document.getElementById('position-input');
+    const playlistContainer = document.getElementById('playlist');
     searchBtn.addEventListener('click', async () => {
         console.log('[UI] Buscar click');
         const query = searchInput.value.trim();
@@ -190,7 +255,13 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Error al buscar videos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
         }
     });
-    // Delegación de eventos: un solo listener para todos los botones de cada canción
+    addBtn.addEventListener('click', addSong);
+    prevBtn.addEventListener('click', previousSong);
+    playBtn.addEventListener('click', playSong);
+    nextBtn.addEventListener('click', nextSong);
+    positionSelect.addEventListener('change', () => {
+        positionInput.style.display = positionSelect.value === 'position' ? 'block' : 'none';
+    });
     resultsContainer.addEventListener('click', (ev) => {
         const target = ev.target;
         const item = target.closest('.video-item');
@@ -199,20 +270,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = item.getAttribute('data-video-id');
         if (!id)
             return;
+        const video = lastResults.find(v => v.id.videoId === id);
+        if (!video)
+            return;
+        if (target.closest('.btn-add-to-playlist')) {
+            ev.stopPropagation();
+            addSongFromSearch(video);
+            return;
+        }
         if (target.closest('.btn-play')) {
             ev.stopPropagation();
             selectVideo(id);
             return;
         }
-        if (target.closest('.btn-pause')) {
-            ev.stopPropagation();
-            pauseVideo();
+    });
+    playlistContainer.addEventListener('click', (ev) => {
+        const target = ev.target;
+        const index = parseInt(target.getAttribute('data-index') || '-1');
+        if (index === -1)
             return;
+        if (target.classList.contains('favorite-btn')) {
+            toggleFavorite(index);
         }
-        if (target.closest('.btn-stop')) {
-            ev.stopPropagation();
-            stopVideo();
-            return;
+        else if (target.classList.contains('btn-select')) {
+            const songs = playlist.getAllSongs();
+            playlist.setCurrent(songs[index]);
+            updateCurrentSong();
+        }
+        else if (target.classList.contains('btn-remove')) {
+            const songs = playlist.getAllSongs();
+            playlist.remove(songs[index]);
+            updatePlaylistDisplay();
+            updateCurrentSong();
         }
     });
     // Si la API de YouTube ya cargó antes de que registráramos el callback, inicializa el player ahora
@@ -223,21 +312,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // Hacer onYouTubeIframeAPIReady global para que YouTube la llame
 window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
-// Encuentra el siguiente video candidato para reproducir cuando uno falla con error 101/150
-function findNextPlayableVideoId(currentId) {
-    if (!lastResults || lastResults.length === 0)
-        return null;
-    const ids = lastResults.map(v => v.id.videoId).filter(Boolean);
-    if (ids.length === 0)
-        return null;
-    const startIndex = currentId ? ids.indexOf(currentId) : -1;
-    const n = ids.length;
-    for (let offset = 1; offset < n; offset++) {
-        const idx = (startIndex + offset) % n;
-        const candidate = ids[idx];
-        if (candidate && candidate !== currentId) {
-            return candidate;
-        }
-    }
-    return null;
-}

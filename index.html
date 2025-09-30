@@ -3,18 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MusicWinvale - Reproductor YouTube</title>
+  <title>Lista de Reproducción con Listas Dobles</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container">
-    <h1>MusicWinvale</h1>
+    <h1>Lista de Reproducción con Listas Dobles</h1>
     <div class="search-section">
-      <input type="text" id="search-input" placeholder="Buscar música...">
+      <input type="text" id="search-input" placeholder="Buscar música en YouTube...">
       <button id="search-btn">Buscar</button>
     </div>
     <div class="results" id="results"></div>
-    <!-- Controles globales removidos. Ahora cada canción tiene sus propios botones. -->
+    <div class="add-song-section">
+      <input type="text" id="title-input" placeholder="Título de la canción">
+      <input type="text" id="artist-input" placeholder="Artista">
+      <input type="text" id="duration-input" placeholder="Duración (opcional)">
+      <select id="position-select">
+        <option value="end">Al final</option>
+        <option value="beginning">Al inicio</option>
+        <option value="position">En posición</option>
+      </select>
+      <input type="number" id="position-input" placeholder="Posición" style="display: none;">
+      <button id="add-btn">Agregar Canción Manual</button>
+    </div>
+    <div class="playlist" id="playlist"></div>
+    <div class="controls">
+      <button id="prev-btn">⏮️ Anterior</button>
+      <button id="play-btn">▶️ Reproducir</button>
+      <button id="next-btn">⏭️ Siguiente</button>
+    </div>
+    <div class="current-song" id="current-song">Ninguna canción seleccionada</div>
     <div id="player"></div>
   </div>
   <script src="https://www.youtube.com/iframe_api"></script>
