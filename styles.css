@@ -1,0 +1,125 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  color: #1db954;
+}
+
+.search-section {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  flex: 1;
+  padding: 10px;
+  background-color: #333;
+  border: 1px solid #555;
+  color: #fff;
+  border-radius: 4px 0 0 4px;
+}
+
+#search-btn {
+  padding: 10px 20px;
+  background-color: #1db954;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 0 4px 4px 0;
+}
+
+#search-btn:hover {
+  background-color: #1aa34a;
+}
+
+.results {
+  margin-bottom: 20px;
+}
+
+.video-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #333;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.video-item:hover {
+  background-color: #444;
+}
+
+.video-thumbnail {
+  width: 120px;
+  height: 90px;
+  margin-right: 15px;
+  border-radius: 4px;
+}
+
+.video-title {
+  flex: 1;
+  font-size: 16px;
+}
+
+/* Acciones por canción (botones al lado derecho) */
+.video-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 8px 12px;
+  background-color: #333;
+  border: 1px solid #555;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.action-btn:hover {
+  background-color: #555;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.player-controls button {
+  padding: 10px 20px;
+  background-color: #333;
+  border: 1px solid #555;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.player-controls button:hover {
+  background-color: #555;
+}
+
+#player {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  bottom: 0;
+  right: 0;
+  opacity: 0;
+  pointer-events: none;
+}

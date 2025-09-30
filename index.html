@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MusicWinvale - Reproductor YouTube</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>MusicWinvale</h1>
+    <div class="search-section">
+      <input type="text" id="search-input" placeholder="Buscar música...">
+      <button id="search-btn">Buscar</button>
+    </div>
+    <div class="results" id="results"></div>
+    <!-- Controles globales removidos. Ahora cada canción tiene sus propios botones. -->
+    <div id="player"></div>
+  </div>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script type="module" src="dist/app.js"></script>
+</body>
+</html>
