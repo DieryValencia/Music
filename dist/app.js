@@ -77,8 +77,14 @@ function displayResults(videos) {
       <img src="${video.snippet.thumbnails.default.url}" alt="${video.snippet.title}" class="video-thumbnail">
       <div class="video-title">${video.snippet.title}</div>
       <div class="video-actions">
-        <button class="action-btn btn-add-to-playlist" aria-label="Agregar a lista">➕</button>
+        <button class="action-btn btn-add-options" aria-label="Opciones de agregar">➕</button>
         <button class="action-btn btn-play" aria-label="Reproducir">▶️</button>
+      </div>
+      <div class="add-options" style="display: none;">
+        <button class="add-option-btn" data-position="beginning">Al inicio</button>
+        <button class="add-option-btn" data-position="end">Al final</button>
+        <input type="number" class="position-input" placeholder="Posición" min="0">
+        <button class="add-option-btn" data-position="position">En posición</button>
       </div>
     `;
         resultsContainer.appendChild(videoElement);
@@ -109,41 +115,6 @@ function updateCurrentSong() {
     const currentSongElement = document.getElementById('current-song');
     const current = playlist.getCurrent();
     currentSongElement.textContent = current ? `${current.title} - ${current.artist}` : 'Ninguna canción seleccionada';
-}
-function addSong() {
-    const titleInput = document.getElementById('title-input');
-    const artistInput = document.getElementById('artist-input');
-    const durationInput = document.getElementById('duration-input');
-    const positionSelect = document.getElementById('position-select');
-    const positionInput = document.getElementById('position-input');
-    const title = titleInput.value.trim();
-    const artist = artistInput.value.trim();
-    const duration = durationInput.value.trim();
-    if (!title || !artist) {
-        alert('Por favor ingresa título y artista');
-        return;
-    }
-    const song = new Song(title, artist, duration);
-    const position = positionSelect.value;
-    if (position === 'beginning') {
-        playlist.addAtBeginning(song);
-    }
-    else if (position === 'end') {
-        playlist.addAtEnd(song);
-    }
-    else if (position === 'position') {
-        const pos = parseInt(positionInput.value);
-        if (isNaN(pos) || pos < 0 || pos > playlist.getSize()) {
-            alert('Posición inválida');
-            return;
-        }
-        playlist.addAtPosition(song, pos);
-    }
-    updatePlaylistDisplay();
-    titleInput.value = '';
-    artistInput.value = '';
-    durationInput.value = '';
-    positionInput.value = '';
 }
 function nextSong() {
     playlist.next();
@@ -233,12 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById('search-btn');
     const searchInput = document.getElementById('search-input');
     const resultsContainer = document.getElementById('results');
-    const addBtn = document.getElementById('add-btn');
     const prevBtn = document.getElementById('prev-btn');
     const playBtn = document.getElementById('play-btn');
     const nextBtn = document.getElementById('next-btn');
-    const positionSelect = document.getElementById('position-select');
-    const positionInput = document.getElementById('position-input');
     const playlistContainer = document.getElementById('playlist');
     searchBtn.addEventListener('click', async () => {
         console.log('[UI] Buscar click');
@@ -255,13 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Error al buscar videos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
         }
     });
-    addBtn.addEventListener('click', addSong);
     prevBtn.addEventListener('click', previousSong);
     playBtn.addEventListener('click', playSong);
     nextBtn.addEventListener('click', nextSong);
-    positionSelect.addEventListener('change', () => {
-        positionInput.style.display = positionSelect.value === 'position' ? 'block' : 'none';
-    });
     resultsContainer.addEventListener('click', (ev) => {
         const target = ev.target;
         const item = target.closest('.video-item');
@@ -273,9 +237,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const video = lastResults.find(v => v.id.videoId === id);
         if (!video)
             return;
-        if (target.closest('.btn-add-to-playlist')) {
+        if (target.closest('.btn-add-options')) {
             ev.stopPropagation();
-            addSongFromSearch(video);
+            const options = item.querySelector('.add-options');
+            options.style.display = options.style.display === 'none' ? 'block' : 'none';
+            return;
+        }
+        if (target.closest('.add-option-btn')) {
+            ev.stopPropagation();
+            const position = target.getAttribute('data-position');
+            if (position === 'beginning') {
+                const song = new Song(video.snippet.title, video.snippet.channelTitle, '', false, video.id.videoId);
+                playlist.addAtBeginning(song);
+            }
+            else if (position === 'end') {
+                addSongFromSearch(video);
+            }
+            else if (position === 'position') {
+                const posInput = item.querySelector('.position-input');
+                const pos = parseInt(posInput.value);
+                if (isNaN(pos) || pos < 0 || pos > playlist.getSize()) {
+                    alert('Posición inválida');
+                    return;
+                }
+                const song = new Song(video.snippet.title, video.snippet.channelTitle, '', false, video.id.videoId);
+                playlist.addAtPosition(song, pos);
+            }
+            updatePlaylistDisplay();
+            // Ocultar opciones después de agregar
+            const options = item.querySelector('.add-options');
+            options.style.display = 'none';
             return;
         }
         if (target.closest('.btn-play')) {
