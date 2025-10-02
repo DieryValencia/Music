@@ -37,6 +37,9 @@ import { config } from './config.js';
 
 const playlist = new DoublyLinkedList();
 let lastResults: YouTubeSearchItem[] = [];
+let repeatMode: 'off' | 'one' | 'all' = 'off';
+let isPlaying: boolean = false;
+let volume: number = 50;
 
 // Verifica con videos.list cuáles IDs son embebibles (evita errores 101/150)
 async function filterEmbeddableVideos(items: YouTubeSearchItem[], apiKey: string): Promise<YouTubeSearchItem[]> {
@@ -161,11 +164,17 @@ function updateCurrentSong(): void {
 function nextSong(): void {
   playlist.next();
   updateCurrentSong();
+  if (isPlaying) {
+    playSong();
+  }
 }
 
 function previousSong(): void {
   playlist.previous();
   updateCurrentSong();
+  if (isPlaying) {
+    playSong();
+  }
 }
 
 function addSongFromSearch(video: YouTubeSearchItem): void {
@@ -190,10 +199,59 @@ function playSong(): void {
   const current = playlist.getCurrent();
   if (current && current.videoId) {
     selectVideo(current.videoId);
+    isPlaying = true;
+    updatePlayPauseButtons();
   } else if (current) {
     alert(`Reproduciendo: ${current.title} - ${current.artist}`);
+    isPlaying = true;
+    updatePlayPauseButtons();
   } else {
     alert('No hay canción seleccionada');
+  }
+}
+
+function pauseSong(): void {
+  if (player) {
+    player.pauseVideo();
+  }
+  isPlaying = false;
+  updatePlayPauseButtons();
+}
+
+function updatePlayPauseButtons(): void {
+  const playBtn = document.getElementById('play-btn')!;
+  const pauseBtn = document.getElementById('pause-btn')!;
+  if (isPlaying) {
+    playBtn.style.display = 'none';
+    pauseBtn.style.display = 'inline-block';
+  } else {
+    playBtn.style.display = 'inline-block';
+    pauseBtn.style.display = 'none';
+  }
+}
+
+
+function toggleRepeat(): void {
+  if (repeatMode === 'off') {
+    repeatMode = 'all';
+  } else if (repeatMode === 'all') {
+    repeatMode = 'one';
+  } else {
+    repeatMode = 'off';
+  }
+  const repeatBtn = document.getElementById('repeat-btn')!;
+  repeatBtn.textContent = repeatMode === 'off' ? '🔁 Repeat' : repeatMode === 'all' ? '🔁 Repeat All' : '🔂 Repeat One';
+  if (repeatMode !== 'off') {
+    repeatBtn.classList.add('active');
+  } else {
+    repeatBtn.classList.remove('active');
+  }
+}
+
+function setVolume(value: number): void {
+  volume = value;
+  if (player) {
+    player.setVolume(volume);
   }
 }
 
@@ -225,6 +283,7 @@ function onYouTubeIframeAPIReady(): void {
       onReady: () => {
         isPlayerReady = true;
         console.log('Player listo');
+        player.setVolume(volume);
         // Si el usuario seleccionó un video antes de que el player estuviera listo, cárgalo y reprodúcelo ahora
         if (currentVideoId) {
           try {
@@ -236,7 +295,22 @@ function onYouTubeIframeAPIReady(): void {
         }
       },
       onStateChange: (event: any) => {
-        // Manejar cambios de estado si es necesario
+        if (event.data === 0) { // ENDED
+          if (repeatMode === 'one') {
+            playSong(); // Repetir la misma canción
+          } else if (repeatMode === 'all' || playlist.getSize() > 1) {
+            nextSong();
+          } else {
+            isPlaying = false;
+            updatePlayPauseButtons();
+          }
+        } else if (event.data === 1) { // PLAYING
+          isPlaying = true;
+          updatePlayPauseButtons();
+        } else if (event.data === 2) { // PAUSED
+          isPlaying = false;
+          updatePlayPauseButtons();
+        }
       },
       onError: (e: any) => {
         console.warn('[YT] onError (silencioso):', e?.data);
@@ -252,7 +326,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const resultsContainer = document.getElementById('results')!;
   const prevBtn = document.getElementById('prev-btn')!;
   const playBtn = document.getElementById('play-btn')!;
+  const pauseBtn = document.getElementById('pause-btn')!;
   const nextBtn = document.getElementById('next-btn')!;
+  const repeatBtn = document.getElementById('repeat-btn')!;
+  const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
   const playlistContainer = document.getElementById('playlist')!;
 
   searchBtn.addEventListener('click', async () => {
@@ -272,7 +349,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   prevBtn.addEventListener('click', previousSong);
   playBtn.addEventListener('click', playSong);
+  pauseBtn.addEventListener('click', pauseSong);
   nextBtn.addEventListener('click', nextSong);
+  repeatBtn.addEventListener('click', toggleRepeat);
+  volumeSlider.addEventListener('input', (e) => setVolume(parseInt((e.target as HTMLInputElement).value)));
 
   resultsContainer.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;

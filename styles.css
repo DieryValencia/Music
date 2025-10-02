@@ -107,21 +107,57 @@ h1 {
 .controls {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
-.controls button {
-  padding: 10px 20px;
+.control-btn {
+  padding: 10px 15px;
   background-color: #333;
   border: 1px solid #555;
   color: #fff;
   cursor: pointer;
   border-radius: 4px;
+  transition: background-color 0.3s;
 }
 
-.controls button:hover {
+.control-btn:hover {
   background-color: #555;
+}
+
+.control-btn.active {
+  background-color: #1db954;
+  border-color: #1db954;
+}
+
+.volume-slider {
+  width: 100px;
+  height: 5px;
+  background: #333;
+  outline: none;
+  border-radius: 5px;
+  -webkit-appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #1db954;
+  cursor: pointer;
+  border: none;
 }
 
 .current-song {
