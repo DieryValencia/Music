@@ -4,15 +4,18 @@
   "description": "Reproductor de música YouTube en TypeScript vanilla",
   "main": "dist/app.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
+    "postinstall": "chmod +x node_modules/.bin/tsc || true",
     "start": "npm run build && npx http-server . -p 8000 -c-1 --cors",
     "dev": "npx http-server . -p 8000 -c-1 --cors"
   },
   "keywords": ["music", "youtube", "player", "typescript"],
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.0.0",
     "http-server": "^14.1.1"
   }
 }
