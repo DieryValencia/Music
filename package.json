@@ -2,7 +2,7 @@
   "name": "musicwinvale",
   "version": "1.0.0",
   "description": "Reproductor de música YouTube en TypeScript vanilla",
-  "main": "dist/app.js",
+  "main": "public/app.js",
   "scripts": {
     "build": "npx tsc",
     "postinstall": "chmod +x node_modules/.bin/tsc || true",
