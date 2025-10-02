@@ -107,11 +107,38 @@ function updatePlaylistDisplay() {
       </div>
       <div class="song-actions">
         <button class="favorite-btn ${song.isFavorite ? 'favorited' : ''}" data-index="${index}">❤️</button>
+        <button class="action-btn btn-edit" data-index="${index}">✏️ Editar</button>
         <button class="action-btn btn-select" data-index="${index}">Seleccionar</button>
         <button class="action-btn btn-remove" data-index="${index}">Eliminar</button>
       </div>
     `;
         playlistContainer.appendChild(songElement);
+    });
+    updateFavoritesDisplay();
+}
+function updateFavoritesDisplay() {
+    const favoritesContainer = document.getElementById('favorites');
+    favoritesContainer.innerHTML = '<h2>Favoritos</h2>';
+    const songs = playlist.getAllSongs();
+    const favorites = songs.filter(song => song.isFavorite);
+    if (favorites.length === 0) {
+        favoritesContainer.innerHTML += '<div class="no-favorites">No hay canciones favoritas</div>';
+        return;
+    }
+    favorites.forEach((song, index) => {
+        const favoriteElement = document.createElement('div');
+        favoriteElement.className = 'favorite-item';
+        favoriteElement.innerHTML = `
+      <div class="song-info">
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist} ${song.duration ? `(${song.duration})` : ''}</div>
+      </div>
+      <div class="favorite-actions">
+        <button class="action-btn btn-edit-favorite" data-index="${songs.indexOf(song)}">✏️ Editar</button>
+        <button class="favorite-btn favorited" data-index="${songs.indexOf(song)}">❤️</button>
+      </div>
+    `;
+        favoritesContainer.appendChild(favoriteElement);
     });
 }
 function updateCurrentSong() {
@@ -142,6 +169,24 @@ function toggleFavorite(index) {
     const songs = playlist.getAllSongs();
     songs[index].isFavorite = !songs[index].isFavorite;
     updatePlaylistDisplay();
+}
+function editPosition(index) {
+    const songs = playlist.getAllSongs();
+    const song = songs[index];
+    const newPosition = prompt(`Nueva posición para "${song.title}" (0-${playlist.getSize() - 1}):`, index.toString());
+    if (newPosition === null)
+        return; // Cancelado
+    const pos = parseInt(newPosition);
+    if (isNaN(pos) || pos < 0 || pos >= playlist.getSize()) {
+        alert('Posición inválida');
+        return;
+    }
+    // Remover de la posición actual
+    playlist.remove(song);
+    // Agregar en la nueva posición
+    playlist.addAtPosition(song, pos);
+    updatePlaylistDisplay();
+    updateCurrentSong();
 }
 // Variables globales para YouTube
 let player = null;
@@ -366,6 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('favorite-btn')) {
             toggleFavorite(index);
         }
+        else if (target.classList.contains('btn-edit')) {
+            editPosition(index);
+        }
         else if (target.classList.contains('btn-select')) {
             const songs = playlist.getAllSongs();
             playlist.setCurrent(songs[index]);
@@ -376,6 +424,19 @@ document.addEventListener('DOMContentLoaded', () => {
             playlist.remove(songs[index]);
             updatePlaylistDisplay();
             updateCurrentSong();
+        }
+    });
+    const favoritesContainer = document.getElementById('favorites');
+    favoritesContainer.addEventListener('click', (ev) => {
+        const target = ev.target;
+        const index = parseInt(target.getAttribute('data-index') || '-1');
+        if (index === -1)
+            return;
+        if (target.classList.contains('btn-edit-favorite')) {
+            editPosition(index);
+        }
+        else if (target.classList.contains('favorite-btn')) {
+            toggleFavorite(index);
         }
     });
     // Si la API de YouTube ya cargó antes de que registráramos el callback, inicializa el player ahora

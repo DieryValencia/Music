@@ -61,6 +61,40 @@ h1 {
   margin-bottom: 20px;
 }
 
+.favorites {
+  margin-bottom: 20px;
+}
+
+.favorites h2 {
+  color: #1db954;
+  margin-bottom: 15px;
+}
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #333;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.favorite-item:hover {
+  background-color: #444;
+}
+
+.favorite-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.no-favorites {
+  text-align: center;
+  color: #ccc;
+  font-style: italic;
+  padding: 20px;
+}
+
 .song-item {
   display: flex;
   align-items: center;
@@ -130,6 +164,12 @@ h1 {
 .control-btn.active {
   background-color: #1db954;
   border-color: #1db954;
+}
+
+.volume-icon {
+  font-size: 16px;
+  margin-right: 5px;
+  color: #1db954;
 }
 
 .volume-slider {
