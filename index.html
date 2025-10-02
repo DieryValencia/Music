@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista de Reproducción con Listas Dobles</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Reproducción con Listas Dobles</h1>
+    <div class="search-section">
+      <input type="text" id="search-input" placeholder="🔍 Buscar música en YouTube...">
+      <button id="search-btn">Buscar</button>
+    </div>
+    <div class="results" id="results"></div>
+    <div class="playlist" id="playlist"></div>
+    <div class="controls">
+      <button id="prev-btn" class="control-btn">⏮️ Anterior</button>
+      <button id="play-btn" class="control-btn">▶️ Reproducir</button>
+      <button id="pause-btn" class="control-btn" style="display: none;">⏸️ Pausa</button>
+      <button id="next-btn" class="control-btn">⏭️ Siguiente</button>
+      <button id="repeat-btn" class="control-btn">🔁 Repeat</button>
+      <input type="range" id="volume-slider" min="0" max="100" value="50" class="volume-slider">
+    </div>
+    <div class="current-song" id="current-song">Ninguna canción seleccionada</div>
+    <div id="player"></div>
+  </div>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script type="module" src="dist/app.js"></script>
+</body>
+</html>

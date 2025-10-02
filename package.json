@@ -6,8 +6,8 @@
   "scripts": {
     "build": "npx tsc",
     "postinstall": "chmod +x node_modules/.bin/tsc || true",
-    "start": "npm run build && npx http-server public -p 8000 -c-1 --cors",
-    "dev": "npx http-server public -p 8080 -c-1 --cors"
+    "start": "npm run build && npx http-server . -p 8000 -c-1 --cors",
+    "dev": "npx http-server . -p 8080 -c-1 --cors"
   },
   "keywords": ["music", "youtube", "player", "typescript"],
   "author": "",
