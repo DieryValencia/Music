@@ -318,6 +318,23 @@ function setVolume(value: number): void {
   }
 }
 
+/** Retrocede 10 segundos en la canción actual. */
+function rewindSong(): void {
+  if (player) {
+    const currentTime = player.getCurrentTime();
+    player.seekTo(Math.max(0, currentTime - 10));
+  }
+}
+
+/** Avanza 10 segundos en la canción actual. */
+function fastForwardSong(): void {
+  if (player) {
+    const currentTime = player.getCurrentTime();
+    const duration = player.getDuration();
+    player.seekTo(Math.min(duration, currentTime + 10));
+  }
+}
+
 /** Selecciona y carga un video para reproducción. */
 function selectVideo(videoId: string): void {
   console.log('[UI] Seleccionado video:', videoId);
@@ -393,6 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const nextBtn = document.getElementById('next-btn')!;
   const repeatBtn = document.getElementById('repeat-btn')!;
   const volumeSlider = document.getElementById('volume-slider') as HTMLInputElement;
+  const rewindBtn = document.getElementById('rewind-btn')!;
+  const fastForwardBtn = document.getElementById('fast-forward-btn')!;
   const playlistContainer = document.getElementById('playlist')!;
 
   searchBtn.addEventListener('click', async () => {
@@ -416,6 +435,8 @@ document.addEventListener('DOMContentLoaded', () => {
   nextBtn.addEventListener('click', nextSong);
   repeatBtn.addEventListener('click', toggleRepeat);
   volumeSlider.addEventListener('input', (e) => setVolume(parseInt((e.target as HTMLInputElement).value)));
+  rewindBtn.addEventListener('click', rewindSong);
+  fastForwardBtn.addEventListener('click', fastForwardSong);
 
   resultsContainer.addEventListener('click', (ev) => {
     const target = ev.target as HTMLElement;
