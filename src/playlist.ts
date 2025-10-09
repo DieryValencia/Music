@@ -1,25 +1,38 @@
+/**
+ * Representa una canción en la playlist.
+ */
 export class Song {
   constructor(public title: string, public artist: string, public duration?: string, public isFavorite: boolean = false, public videoId?: string) {}
 }
 
+/**
+ * Nodo para la lista doblemente enlazada.
+ */
 export class Node {
   constructor(public song: Song, public prev: Node | null = null, public next: Node | null = null) {}
 }
 
+/**
+ * Lista doblemente enlazada para gestionar la playlist de canciones.
+ * Permite navegación bidireccional y operaciones eficientes.
+ */
 export class DoublyLinkedList {
   private head: Node | null = null;
   private tail: Node | null = null;
   private current: Node | null = null;
   private size: number = 0;
 
+  /** Devuelve el tamaño de la lista. */
   getSize(): number {
     return this.size;
   }
 
+  /** Verifica si la lista está vacía. */
   isEmpty(): boolean {
     return this.size === 0;
   }
 
+  /** Agrega una canción al inicio de la lista. */
   addAtBeginning(song: Song): void {
     const newNode = new Node(song);
     if (this.isEmpty()) {
@@ -32,6 +45,7 @@ export class DoublyLinkedList {
     this.size++;
   }
 
+  /** Agrega una canción al final de la lista. */
   addAtEnd(song: Song): void {
     const newNode = new Node(song);
     if (this.isEmpty()) {
@@ -44,6 +58,7 @@ export class DoublyLinkedList {
     this.size++;
   }
 
+  /** Agrega una canción en una posición específica. */
   addAtPosition(song: Song, position: number): boolean {
     if (position < 0 || position > this.size) return false;
     if (position === 0) {
@@ -67,6 +82,7 @@ export class DoublyLinkedList {
     return true;
   }
 
+  /** Remueve una canción de la lista. */
   remove(song: Song): boolean {
     if (this.isEmpty()) return false;
     let current = this.head;
@@ -95,6 +111,7 @@ export class DoublyLinkedList {
     return false;
   }
 
+  /** Avanza a la siguiente canción. */
   next(): Song | null {
     if (!this.current) return null;
     if (this.current.next) {
@@ -105,6 +122,7 @@ export class DoublyLinkedList {
     return this.current ? this.current.song : null;
   }
 
+  /** Retrocede a la canción anterior. */
   previous(): Song | null {
     if (!this.current) return null;
     if (this.current.prev) {
@@ -115,10 +133,12 @@ export class DoublyLinkedList {
     return this.current ? this.current.song : null;
   }
 
+  /** Obtiene la canción actual. */
   getCurrent(): Song | null {
     return this.current ? this.current.song : null;
   }
 
+  /** Establece la canción actual. */
   setCurrent(song: Song): boolean {
     let current = this.head;
     while (current) {
@@ -131,6 +151,7 @@ export class DoublyLinkedList {
     return false;
   }
 
+  /** Devuelve todas las canciones en un array. */
   getAllSongs(): Song[] {
     const songs: Song[] = [];
     let current = this.head;

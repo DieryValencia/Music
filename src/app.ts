@@ -32,6 +32,11 @@ interface YouTubeVideosListResponse {
   items: YouTubeVideoItem[];
 }
 
+/**
+ * Aplicación principal para reproductor de música con YouTube.
+ * Maneja búsqueda, playlist y reproducción.
+ */
+
 // Importar configuración
 import { config } from './config.js';
 
@@ -41,7 +46,7 @@ let repeatMode: 'off' | 'one' | 'all' = 'off';
 let isPlaying: boolean = false;
 let volume: number = 50;
 
-// Verifica con videos.list cuáles IDs son embebibles (evita errores 101/150)
+/** Filtra videos que permiten embedding para evitar errores de reproducción. */
 async function filterEmbeddableVideos(items: YouTubeSearchItem[], apiKey: string): Promise<YouTubeSearchItem[]> {
   const ids = items.map(i => i.id.videoId).filter(Boolean);
   if (ids.length === 0) return [];
@@ -64,7 +69,7 @@ async function filterEmbeddableVideos(items: YouTubeSearchItem[], apiKey: string
   }
 }
 
-// Función para obtener la API key
+/** Obtiene la API key configurada o muestra alerta si falta. */
 function getApiKey(): string | null {
   console.log('API Key cargada:', config.YOUTUBE_API_KEY);
   if (!config.YOUTUBE_API_KEY || config.YOUTUBE_API_KEY === 'TU_API_KEY_AQUI') {
@@ -74,7 +79,7 @@ function getApiKey(): string | null {
   return config.YOUTUBE_API_KEY;
 }
 
-// Función de búsqueda
+/** Busca videos en YouTube usando la API. */
 async function searchVideos(query: string): Promise<YouTubeSearchItem[]> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -98,7 +103,7 @@ async function searchVideos(query: string): Promise<YouTubeSearchItem[]> {
   }
 }
 
-// Función para mostrar resultados
+/** Muestra los resultados de búsqueda en la UI. */
 function displayResults(videos: YouTubeSearchItem[]): void {
   const resultsContainer = document.getElementById('results')!;
   resultsContainer.innerHTML = '';
@@ -132,6 +137,7 @@ function displayResults(videos: YouTubeSearchItem[]): void {
   });
 }
 
+/** Actualiza la visualización de la playlist en la UI. */
 function updatePlaylistDisplay(): void {
   const playlistContainer = document.getElementById('playlist')!;
   playlistContainer.innerHTML = '';
@@ -156,6 +162,7 @@ function updatePlaylistDisplay(): void {
   updateFavoritesDisplay();
 }
 
+/** Actualiza la visualización de favoritos en la UI. */
 function updateFavoritesDisplay(): void {
   const favoritesContainer = document.getElementById('favorites')!;
   favoritesContainer.innerHTML = '<h2>Favoritos</h2>';
@@ -182,6 +189,7 @@ function updateFavoritesDisplay(): void {
   });
 }
 
+/** Actualiza la canción actual en la UI. */
 function updateCurrentSong(): void {
   const currentSongElement = document.getElementById('current-song')!;
   const current = playlist.getCurrent();
@@ -189,6 +197,7 @@ function updateCurrentSong(): void {
 }
 
 
+/** Avanza a la siguiente canción y reproduce si está activo. */
 function nextSong(): void {
   playlist.next();
   updateCurrentSong();
@@ -197,6 +206,7 @@ function nextSong(): void {
   }
 }
 
+/** Retrocede a la canción anterior y reproduce si está activo. */
 function previousSong(): void {
   playlist.previous();
   updateCurrentSong();
@@ -205,18 +215,21 @@ function previousSong(): void {
   }
 }
 
+/** Agrega una canción desde los resultados de búsqueda al final de la playlist. */
 function addSongFromSearch(video: YouTubeSearchItem): void {
   const song = new Song(video.snippet.title, video.snippet.channelTitle, '', false, video.id.videoId);
   playlist.addAtEnd(song);
   updatePlaylistDisplay();
 }
 
+/** Alterna el estado de favorito de una canción. */
 function toggleFavorite(index: number): void {
   const songs = playlist.getAllSongs();
   songs[index].isFavorite = !songs[index].isFavorite;
   updatePlaylistDisplay();
 }
 
+/** Edita la posición de una canción en la playlist. */
 function editPosition(index: number): void {
   const songs = playlist.getAllSongs();
   const song = songs[index];
@@ -240,7 +253,7 @@ let player: any = null;
 let currentVideoId: string | null = null;
 let isPlayerReady: boolean = false;
 
-// Función para reproducir
+/** Reproduce la canción actual o selecciona video si tiene ID. */
 function playSong(): void {
   const current = playlist.getCurrent();
   if (current && current.videoId) {
@@ -256,6 +269,7 @@ function playSong(): void {
   }
 }
 
+/** Pausa la reproducción actual. */
 function pauseSong(): void {
   if (player) {
     player.pauseVideo();
@@ -264,6 +278,7 @@ function pauseSong(): void {
   updatePlayPauseButtons();
 }
 
+/** Actualiza los botones de play/pause en la UI. */
 function updatePlayPauseButtons(): void {
   const playBtn = document.getElementById('play-btn')!;
   const pauseBtn = document.getElementById('pause-btn')!;
@@ -277,6 +292,7 @@ function updatePlayPauseButtons(): void {
 }
 
 
+/** Alterna el modo de repetición (off, all, one). */
 function toggleRepeat(): void {
   if (repeatMode === 'off') {
     repeatMode = 'all';
@@ -294,6 +310,7 @@ function toggleRepeat(): void {
   }
 }
 
+/** Establece el volumen del reproductor. */
 function setVolume(value: number): void {
   volume = value;
   if (player) {
@@ -301,7 +318,7 @@ function setVolume(value: number): void {
   }
 }
 
-// Seleccionar video: carga y reproduce inmediatamente aprovechando el gesto del usuario
+/** Selecciona y carga un video para reproducción. */
 function selectVideo(videoId: string): void {
   console.log('[UI] Seleccionado video:', videoId);
   currentVideoId = videoId;
@@ -319,7 +336,7 @@ function selectVideo(videoId: string): void {
   }
 }
 
-// Inicializar el reproductor de YouTube
+/** Inicializa el reproductor embebido de YouTube. */
 function onYouTubeIframeAPIReady(): void {
   player = new (window as any).YT.Player('player', {
     height: '1',
